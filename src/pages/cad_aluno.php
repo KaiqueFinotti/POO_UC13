@@ -2,11 +2,9 @@
 
 require __DIR__ . "/../class/aluno.php";
 
-// Inicializa as variáveis
-$nome = $idade =$cpf =$curso = "";
+$nome = $idade = $cpf = $curso = "";
 $alunoCriado = false;
 
-//Cadastrando
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome = trim($_POST["nome"]);
     $idade = trim($_POST["idade"]);
@@ -14,14 +12,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $curso = trim($_POST["curso"]);
     try {
         $aluno = new Aluno($nome, $idade, $cpf, $curso);
-        $alunoCriado = true;
+        if ($aluno->salvarNoBanco()) {
+           echo "<div class='alert alert-success'>Cadastro efetuado com sucesso</div>";
+        } else {
+            echo "<div class='alert alert-danger mt-3'>Erro ao salvar no banco de dados.</div>";
+        }
     } catch (Exception $e) {
         echo "<div class='alert alert-danger mt-3'>" . $e->getMessage() . "</div>";
     }
 }
-
+$alunos = Aluno::listar(); // Método para listar alunos
 ?>
-
 
 <h2>Cadastro de Aluno</h2>
 
@@ -51,9 +52,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </form>
 
-<?php
-if ($alunoCriado) {
-echo "<h3>Resultado:</h3>";
-$aluno->exibirDados();
-}
-?>
+<h3>Lista de Alunos</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Idade</th>
+        </tr>
+    </thead>
+    <tbody>
+       <?php if ($alunos && count($alunos) > 0): ?>
+            <?php foreach ($alunos as $aluno): ?>
+                <tr>
+                    <td><?= htmlspecialchars($aluno['nome']) ?></td>
+                    <td><?= htmlspecialchars($aluno['cpf']) ?></td>
+                    <td><?= htmlspecialchars($aluno['idade']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="4" class="text-center">Nenhum aluno cadastrado.</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>

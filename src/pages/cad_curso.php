@@ -1,24 +1,32 @@
 <?php
-
-require __DIR__ . "/../class/curso.php";
+include "src/class/curso.php";
 
 // Inicializa as variáveis
-$titulo = $horas =$dias =$aluno = "";
+$titulo = $horas = $dias = $aluno = "";
 $cursoCriado = false;
 
-//Cadastrando
+// Cadastrando
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $titulo = trim($_POST["titulo"]);
     $horas = trim($_POST["horas"]);
     $dias = trim($_POST["dias"]);
     $aluno = trim($_POST["aluno"]);
+
     try {
         $curso = new Curso($titulo, $horas, $dias, $aluno);
-        $cursoCriado = true;
+
+        // Só depois de instanciar, você chama o método
+        if ($curso->salvarNoBanco()) {
+            echo "<div class='alert alert-success'>Cadastro efetuado com sucesso</div>";
+        } else {
+            echo "<div class='alert alert-danger mt-3'>Erro ao salvar no banco de dados.</div>";
+        }
+
     } catch (Exception $e) {
         echo "<div class='alert alert-danger mt-3'>" . $e->getMessage() . "</div>";
     }
 }
+$cursos = Curso::listar(); // Método para listar cursos
 ?>
 
 <h2>Cadastro de Curso</h2>
@@ -50,7 +58,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </form>
 
 <?php
-if ($cursoCriado) {
-echo "<h3>Resultado:</h3>";
-$curso->exibirDados();
+if ($cursoCriado && $curso !== null) {
+    echo "<h3>Resultado:</h3>";
+    $curso->exibirDados();
 }
+?>
+
+<h3>Lista de Curso</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>titulo</th>
+            <th>dias</th>
+            <th>horas</th>
+        </tr>
+    </thead>
+    <tbody>
+       <?php if ($cursos && count($cursos) > 0): ?>
+            <?php foreach ($cursos as $curso1): ?>
+                <tr>
+                    <td><?= htmlspecialchars($curso1['titulo']) ?></td>
+                    <td><?= htmlspecialchars($curso1['dias']) ?></td>
+                    <td><?= htmlspecialchars($curso1['horas']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="4" class="text-center">Nenhum curso cadastrado.</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>

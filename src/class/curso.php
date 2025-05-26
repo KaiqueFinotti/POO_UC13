@@ -1,5 +1,7 @@
 <?php
  
+include "db/conection.php";
+
 class Curso {
     public $titulo;
     public $horas;
@@ -28,11 +30,29 @@ class Curso {
         return $this->aluno;
     }
  
-    // Método para exibir os dados
-    public function exibirDados() {
-        echo "<p>Título: <strong>$this->titulo</strong><br>";
-        echo "Horas: <strong>$this->horas</strong> anos<br>";
-        echo "Dias: <strong>$this->dias</strong><br>";
-        echo "Aluno: <strong>" . $this->getAluno() . "</strong></p>";
+    // NOVO MÉTODO: Salvar no banco
+    public function salvarNoBanco() {
+        $database = new Conexao();
+        $conn = $database->getConexao();
+        $sql = "INSERT INTO curso (titulo, horas, dias) VALUES (:titulo, :horas, :dias)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':titulo', $this->titulo);
+        $stmt->bindParam(':horas', $this->horas);
+        $stmt->bindParam(':dias', $this->dias);
+        return $stmt->execute(); // retorna true/false
+    }
+        // Método para listar os alunos
+    public static function listar() {
+        // Conexão com o banco de dados
+        $database = new Conexao();
+        $conn = $database->getConexao();
+
+        // Preparar a consulta SQL
+        $query = "SELECT * FROM curso";
+        $stmt = $conn->prepare($query);
+        $stmt->execute();
+ 
+        // Retornar os resultados
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

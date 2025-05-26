@@ -1,14 +1,15 @@
 <?php
-$host = "localhost";
-$banco = "projeto_poo";
-$usuario = "root";
-$senha = "senac123";
+class Conexao {
+    
+    private static $instance = null;
 
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$banco;charset=utf8", $usuario, $senha);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Conexão bem-sucedida!";
-} catch (PDOException $e) {
-    echo "Erro na conexão: " . $e->getMessage();
+    public static function getConexao() {
+        if (self::$instance === null) {
+            self::$instance = new PDO("mysql:host=localhost;dbname=projeto_poo;charset=utf8", "root", "senac123");
+            self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
+        return self::$instance;
+    }
 }
+
 ?>
